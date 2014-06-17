@@ -27,6 +27,6 @@ Feel free to remove any port that you don't want to expose.
 
 Configuring your InfluxDB
 -------------------------
-Open your browse to access `localhost:8083` to configure InfluxDB. Fill the port which maps to `8806`. The default credential is `root:root`. Please change it as soon as possible.
+Open your browse to access `localhost:8083` to configure InfluxDB. Fill the port which maps to `8086`. The default credential is `root:root`. Please change it as soon as possible.
 
 Alternatively, you can use RESTful API to talk to InfluxDB on port `8086`
