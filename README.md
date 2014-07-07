@@ -18,11 +18,9 @@ You can now push new image to the registry:
 Running your InfluxDB image
 --------------------------
 
-Start your image binding the external ports `8083`, `8086`, `8090`, and `8099` in all interface to your container:
-    
-    docker run -d -p 8083:8083 -p 8086:8086 -p 8090:8090 -p 8099:8099 tutum/influxdb
+Start your image binding the external ports `8083` and `8086` in all interfaces to your container. Ports `8090` and `8099` are only used for clustering and should not be exposed to the internet.
 
-Feel free to remove any port that you don't want to expose.
+    docker run -d -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 tutum/influxdb
 
 
 Configuring your InfluxDB
