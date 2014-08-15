@@ -2,11 +2,17 @@ FROM ubuntu:trusty
 MAINTAINER Feng Honglin <hfeng@tutum.co>
  
 # Install InfluxDB
-RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y wget
-RUN wget -P /tmp http://s3.amazonaws.com/influxdb/influxdb_latest_amd64.deb && dpkg -i /tmp/influxdb_latest_amd64.deb && rm /tmp/influxdb_latest_amd64.deb
+RUN apt-get update && \
+  DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl && \
+  curl -s -o /tmp/influxdb_latest_amd64.deb http://s3.amazonaws.com/influxdb/influxdb_latest_amd64.deb && \
+  dpkg -i /tmp/influxdb_latest_amd64.deb && \
+  rm /tmp/influxdb_latest_amd64.deb
 
 ADD config.toml /config/config.toml
+ADD run.sh /run.sh
+RUN chmod +x /*.sh
+
+ENV PRE_CREATE_DB **None**
 
 # Admin server
 EXPOSE 8083
@@ -25,4 +31,4 @@ EXPOSE 8084
 
 VOLUME ["/data"]
 
-CMD ["/usr/bin/influxdb", "-config=/config/config.toml"]
+CMD ["/run.sh"]

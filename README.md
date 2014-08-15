@@ -28,3 +28,7 @@ Configuring your InfluxDB
 Open your browse to access `localhost:8083` to configure InfluxDB. Fill the port which maps to `8086`. The default credential is `root:root`. Please change it as soon as possible.
 
 Alternatively, you can use RESTful API to talk to InfluxDB on port `8086`
+
+Initially Create Database
+-------------------------
+Use `-e PRE_CREATE_DB="db1;db2;db3" to create database named "db1", "db2", and "db3" on the first time the container starts automatically. Each database name is separated by `;`.
