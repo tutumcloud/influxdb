@@ -18,10 +18,10 @@ EXPOSE 8086
 EXPOSE 8084
 
 # Raft port (for clustering, don't expose publicly!)
-EXPOSE 8090
+#EXPOSE 8090
 
 # Protobuf port (for clustering, don't expose publicly!)
-EXPOSE 8099
+#EXPOSE 8099
 
 VOLUME ["/data"]
 
