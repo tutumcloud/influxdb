@@ -52,6 +52,6 @@ docker run -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 \
 * then launch one or more "slaves":
 ```
 docker run --link masterinflux:master -p 8083 -p 8086 --expose 8090 --expose 8099 \
-  -e SEEDS=\"master:8090\" -e FORCE_HOSTNAME="auto" \
+  -e SEEDS="\"master:8090\"" -e FORCE_HOSTNAME="auto" \
   -d  tutum/influxdb
 ```
