@@ -2,9 +2,12 @@
 
 set -m
 CONFIG_FILE="/config/config.toml"
-#set hostname with IPv4 eth0
-HOSTIPNAME=$(ip a show dev eth0 | grep inet | grep eth0 | sed -e 's/^.*inet.//g' -e 's/\/.*$//g')
-/usr/bin/perl -p -i -e "s/^# hostname.*$/hostname = \"${HOSTIPNAME}\"/g" ${CONFIG_FILE}
+
+if [ -n ${FORCE_HOSTNAME_IP} ]; then
+	#set hostname with IPv4 eth0
+	HOSTIPNAME=$(ip a show dev eth0 | grep inet | grep eth0 | sed -e 's/^.*inet.//g' -e 's/\/.*$//g')
+	/usr/bin/perl -p -i -e "s/^# hostname.*$/hostname = \"${HOSTIPNAME}\"/g" ${CONFIG_FILE}
+fi
 
 if [ -n ${SEEDS} ]; then
 	/usr/bin/perl -p -i -e "s/^# seed-servers.*$/seed-servers = [${SEEDS}]/g" ${CONFIG_FILE}
