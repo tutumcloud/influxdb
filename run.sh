@@ -2,21 +2,22 @@
 
 set -m
 CONFIG_FILE="/config/config.toml"
+#CONFIG_FILE="test"
 
-if [ -n ${FORCE_HOSTNAME_IP} ]; then
+if [ -n "${FORCE_HOSTNAME_IP}" ]; then
 	#set hostname with IPv4 eth0
 	HOSTIPNAME=$(ip a show dev eth0 | grep inet | grep eth0 | sed -e 's/^.*inet.//g' -e 's/\/.*$//g')
 	/usr/bin/perl -p -i -e "s/^# hostname.*$/hostname = \"${HOSTIPNAME}\"/g" ${CONFIG_FILE}
 fi
 
-if [ -n ${SEEDS} ]; then
+if [ -n "${SEEDS}" ]; then
 	/usr/bin/perl -p -i -e "s/^# seed-servers.*$/seed-servers = [${SEEDS}]/g" ${CONFIG_FILE}
 fi
 
-if [ -n ${REPLI_FACTOR} ]; then
+if [ -n "${REPLI_FACTOR}" ]; then
 	/usr/bin/perl -p -i -e "s/replication-factor = 1/replication-factor = ${REPLI_FACTOR}/g" ${CONFIG_FILE}
 fi
-
+ 
 if [ "${PRE_CREATE_DB}" == "**None**" ]; then
     unset PRE_CREATE_DB
 fi
