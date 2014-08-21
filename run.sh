@@ -1,6 +1,15 @@
 #!/bin/bash
 
 set -m
+CONFIG_FILE="/config/config.toml"
+#set hostname with IPv4 eth0
+HOSTIPNAME=$(ip a show dev eth0 | grep inet | grep eth0 | sed -e 's/^.*inet.//g' -e 's/\/.*$//g')
+/usr/bin/perl -p -i -e "s/^# hostname.*$/hostname = \"${HOSTIPNAME}\"/g" ${CONFIG_FILE}
+
+if [ -n ${SEEDS} ]; then
+	/usr/bin/perl -p -i -e "s/^# seed-servers.*$/seed-servers = [${SEEDS}]/g" ${CONFIG_FILE}
+fi
+exit
 
 if [ "${PRE_CREATE_DB}" == "**None**" ]; then
     unset PRE_CREATE_DB
@@ -12,7 +21,7 @@ if [ -n "${PRE_CREATE_DB}" ]; then
         echo "=> Database had been created before, skipping ..."
     else
         echo "=> Starting InfluxDB ..."
-        exec /usr/bin/influxdb -config=/config/config.toml &
+        exec /usr/bin/influxdb -config=${CONFIG_FILE} &
         PASS=${INFLUXDB_INIT_PWD:-root}
         arr=$(echo ${PRE_CREATE_DB} | tr ";" "\n")
 
@@ -43,4 +52,4 @@ fi
 
 echo "=> Starting InfluxDB ..."
 
-exec /usr/bin/influxdb -config=/config/config.toml
+exec /usr/bin/influxdb -config=${CONFIG_FILE}
