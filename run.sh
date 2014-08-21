@@ -10,6 +10,10 @@ if [ -n ${SEEDS} ]; then
 	/usr/bin/perl -p -i -e "s/^# seed-servers.*$/seed-servers = [${SEEDS}]/g" ${CONFIG_FILE}
 fi
 
+if [ -n ${REPLI_FACTOR} ]; then
+	/usr/bin/perl -p -i -e "s/replication-factor = 1/replication-factor = ${REPLI_FACTOR}/g" ${CONFIG_FILE}
+fi
+
 if [ "${PRE_CREATE_DB}" == "**None**" ]; then
     unset PRE_CREATE_DB
 fi
