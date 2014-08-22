@@ -31,8 +31,15 @@ Alternatively, you can use RESTful API to talk to InfluxDB on port `8086`
 
 Initially Create Database
 -------------------------
-Use `-e PRE_CREATE_DB="db1;db2;db3" to create database named "db1", "db2", and "db3" on the first time the container starts automatically. Each database name is separated by `;`.
+Use `-e PRE_CREATE_DB="db1;db2;db3" to create database named "db1", "db2", and "db3" on the first time the container starts automatically. Each database name is separated by `;`. For example:
 
+```docker run -d -p 8083:8083 -p 8804:8084 -e PRE_CREATE_DB="db1;db2;db3" tutum/influxdb:latest``` 
+
+SSL SUPPORT
+-----------
+By default, Influx DB uses port 8086 for HTTP API. If you want to use SSL API, you can provide `SSL_CERT` as an environment variable. In that case, InfluxDB will disable HTTP API on port 8086 and start to listen on port 8084 for SSL connection. The cert file should be an combination of Private Key and Public Certificate. In order to pass it as an environment variable, you need specifically convert `newline` to `\n`(two characters). In order to do this, you can simply run the command `awk 1 ORS='\\n' <your_cert.pem>`. For example:
+
+```docker run -d -p 8083:8083 -p 8804:8084 -e SSL_CERT="`awk 1 ORS='\\n' ~/cert.pem`" tutum/influxdb:latest``` 
 
 Clustering
 ----------

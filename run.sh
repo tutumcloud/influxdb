@@ -26,6 +26,17 @@ if [ "${PRE_CREATE_DB}" == "**None**" ]; then
     unset PRE_CREATE_DB
 fi
 
+if [ "${SSL_CERT}" == "**None**" ]; then
+    unset SSL_CERT
+fi
+
+if [ -n "${SSL_CERT}" ]; then 
+    echo "=> Found ssl cert file, using ssl api instead"
+    echo "=> Listening on port 8084(https api), disabling port 8086(http api)"
+    echo -e "${SSL_CERT}" > /cert.pem
+    sed -i -r -e 's/^# ssl-/ssl-/g' -e 's/^port *= * 8086/# port = 8086/' ${CONFIG_FILE}
+fi
+
 if [ -n "${PRE_CREATE_DB}" ]; then
     echo "=> About to create the following database: ${PRE_CREATE_DB}"
     if [ -f "/data/.pre_db_created" ]; then
