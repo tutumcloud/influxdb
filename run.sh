@@ -30,11 +30,13 @@ if [ "${SSL_CERT}" == "**None**" ]; then
     unset SSL_CERT
 fi
 
+API_URL="http://localhost:8086"
 if [ -n "${SSL_CERT}" ]; then 
     echo "=> Found ssl cert file, using ssl api instead"
     echo "=> Listening on port 8084(https api), disabling port 8086(http api)"
     echo -e "${SSL_CERT}" > /cert.pem
     sed -i -r -e 's/^# ssl-/ssl-/g' -e 's/^port *= * 8086/# port = 8086/' ${CONFIG_FILE}
+    API_URL="https://localhost:8084"
 fi
 
 if [ -n "${PRE_CREATE_DB}" ]; then
@@ -52,7 +54,7 @@ if [ -n "${PRE_CREATE_DB}" ]; then
         while [[ RET -ne 0 ]]; do
             echo "=> Waiting for confirmation of InfluxDB service startup ..."
             sleep 3 
-            curl http://localhost:8086/ping 2> /dev/null
+            curl -k ${API_URL}/ping 2> /dev/null
             RET=$?
         done
         echo ""
@@ -60,7 +62,7 @@ if [ -n "${PRE_CREATE_DB}" ]; then
         for x in $arr
         do
             echo "=> Creating database: ${x}"
-            curl -s -X POST -d "{\"name\":\"${x}\"}" $(echo 'http://localhost:8086/db?u=root&p='${PASS})
+            curl -s -k -X POST -d "{\"name\":\"${x}\"}" $(echo ${API_URL}'/db?u=root&p='${PASS})
         done
         echo ""
 
