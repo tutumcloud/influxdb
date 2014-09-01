@@ -30,13 +30,27 @@ if [ "${SSL_CERT}" == "**None**" ]; then
     unset SSL_CERT
 fi
 
+if [ "${SSL_SUPPORT}" == "**False**" ]; then
+    unset SSL_SUPPORT
+fi
+
 API_URL="http://localhost:8086"
-if [ -n "${SSL_CERT}" ]; then 
-    echo "=> Found ssl cert file, using ssl api instead"
+
+if [ -n "${SSL_SUPPORT}" ]; then
+    echo "=> SSL Support enabled, using SSl api ..."
     echo "=> Listening on port 8084(https api), disabling port 8086(http api)"
-    echo -e "${SSL_CERT}" > /cert.pem
+    if [ -n "${SSL_CERT}" ]; then 
+        echo "=> Use user uploaded certificate"
+        echo -e "${SSL_CERT}" > /server.pem
+    else
+        echo "=> Use self-signed certificate"
+        echo "=> Generating certificate ..."
+        openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj "/C=US/ST=NewYork/L=NYC/O=Tutum/CN=tutum.user" -keyout /server.key -out /server.crt >/dev/null 2>&1
+        cat /server.crt /server.key > /server.pem
+    fi
     sed -i -r -e 's/^# ssl-/ssl-/g' -e 's/^port *= * 8086/# port = 8086/' ${CONFIG_FILE}
     API_URL="https://localhost:8084"
+
 fi
 
 if [ -n "${PRE_CREATE_DB}" ]; then
