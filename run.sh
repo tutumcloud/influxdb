@@ -36,10 +36,10 @@ if [ "${SSL_SUPPORT}" == "**False**" ]; then
 fi
 
 
-#SSL SUPPORT (Use 8084 for SSL connection, 8086 is disable when ssl is enabled)
+#SSL SUPPORT (Enable https support on port 8084)
 API_URL="http://localhost:8086"
 CERT_PEM="/cert.pem"
-SUBJECT_STRING="/C=US/ST=NewYork/L=NYC/O=Tutum/CN=tutum.user"
+SUBJECT_STRING="/C=US/ST=NewYork/L=NYC/O=Tutum/CN=*"
 if [ -n "${SSL_SUPPORT}" ]; then
     echo "=> SSL Support enabled, using SSl api ..."
     echo "=> Listening on port 8084(https api), disabling port 8086(http api)"
@@ -57,9 +57,7 @@ if [ -n "${SSL_SUPPORT}" ]; then
             rm -f /server.key /server.crt
         fi
     fi
-    sed -i -r -e 's/^# ssl-/ssl-/g' -e 's/^port *= * 8086/# port = 8086/' ${CONFIG_FILE}
-    API_URL="https://localhost:8084"
-
+    sed -i -r -e 's/^# ssl-/ssl-/g' ${CONFIG_FILE}
 fi
 
 
