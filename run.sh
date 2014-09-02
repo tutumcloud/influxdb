@@ -2,8 +2,9 @@
 
 set -m
 CONFIG_FILE="/config/config.toml"
-#CONFIG_FILE="test"
 
+
+#Configure InfluxDB Cluster
 if [ -n "${FORCE_HOSTNAME}" ]; then
 	if [ "${FORCE_HOSTNAME}" == "auto" ]; then
 		#set hostname with IPv4 eth0
@@ -34,25 +35,35 @@ if [ "${SSL_SUPPORT}" == "**False**" ]; then
     unset SSL_SUPPORT
 fi
 
-API_URL="http://localhost:8086"
 
+#SSL SUPPORT (Use 8084 for SSL connection, 8086 is disable when ssl is enabled)
+API_URL="http://localhost:8086"
+CERT_PEM="/cert.pem"
+SUBJECT_STRING="/C=US/ST=NewYork/L=NYC/O=Tutum/CN=tutum.user"
 if [ -n "${SSL_SUPPORT}" ]; then
     echo "=> SSL Support enabled, using SSl api ..."
     echo "=> Listening on port 8084(https api), disabling port 8086(http api)"
     if [ -n "${SSL_CERT}" ]; then 
         echo "=> Use user uploaded certificate"
-        echo -e "${SSL_CERT}" > /server.pem
+        echo -e "${SSL_CERT}" > ${CERT_PEM}
     else
         echo "=> Use self-signed certificate"
-        echo "=> Generating certificate ..."
-        openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj "/C=US/ST=NewYork/L=NYC/O=Tutum/CN=tutum.user" -keyout /server.key -out /server.crt >/dev/null 2>&1
-        cat /server.crt /server.key > /server.pem
+        if [  -f ${CERT_PEM} ]; then
+            echo "=> Certificate found, skip ..."
+        else
+            echo "=> Generating certificate ..."
+            openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj ${SUBJECT_STRING} -keyout /server.key -out /server.crt >/dev/null 2>&1
+            cat /server.key /server.crt > ${CERT_PEM}
+            rm -f /server.key /server.crt
+        fi
     fi
     sed -i -r -e 's/^# ssl-/ssl-/g' -e 's/^port *= * 8086/# port = 8086/' ${CONFIG_FILE}
     API_URL="https://localhost:8084"
 
 fi
 
+
+#Pre create database on the initiation of the container
 if [ -n "${PRE_CREATE_DB}" ]; then
     echo "=> About to create the following database: ${PRE_CREATE_DB}"
     if [ -f "/data/.pre_db_created" ]; then
