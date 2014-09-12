@@ -3,8 +3,10 @@ MAINTAINER Feng Honglin <hfeng@tutum.co>
  
 # Install InfluxDB
 RUN apt-get update && \
-  DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends curl ca-certificates && \
-  curl -s -o /tmp/influxdb_latest_amd64.deb https://s3.amazonaws.com/influxdb/influxdb_latest_amd64.deb && \
+  DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends curl ca-certificates
+
+ENV INFLUXDB_VERSION 0.8.2
+RUN curl -s -o /tmp/influxdb_latest_amd64.deb https://s3.amazonaws.com/influxdb/influxdb_${INFLUXDB_VERSION}_amd64.deb && \
   dpkg -i /tmp/influxdb_latest_amd64.deb && \
   rm /tmp/influxdb_latest_amd64.deb && \
   rm -rf /var/lib/apt/lists/*
