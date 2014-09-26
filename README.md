@@ -43,7 +43,7 @@ If you provide `SSL_CERT`, system will use user provided ssl certificate. Otherw
 
 The cert file should be an combination of Private Key and Public Certificate. In order to pass it as an environment variable, you need specifically convert `newline` to `\n`(two characters). In order to do this, you can simply run the command `awk 1 ORS='\\n' <your_cert.pem>`. For example:
 
-```docker run -d -p 8083:8083 -p 8084:8084 -e SSL_SUPPORT -e SSL_CERT="`awk 1 ORS='\\n' ~/cert.pem`" tutum/influxdb:latest``` 
+```docker run -d -p 8083:8083 -p 8084:8084 -e SSL_SUPPORT="True" -e SSL_CERT="`awk 1 ORS='\\n' ~/cert.pem`" tutum/influxdb:latest``` 
 
 Clustering
 ----------
