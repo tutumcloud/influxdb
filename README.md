@@ -48,7 +48,7 @@ The cert file should be an combination of Private Key and Public Certificate. In
 Clustering
 ----------
 Use :
-* `-e SEEDS="host1:8090\, host2:8090"` to pass seeds nodes to your container.
+* `-e SEEDS="host1:8090, host2:8090"` to pass seeds nodes to your container.
 * `-e REPLI_FACTOR=x` where x is the replicator factor of shards through the cluster (defaults to 1)
 * `-e FORCE_HOSTNAME="auto"` to force the hostname in the config file to be set to the container IPv4 eth0 address (usefull to test clustering on a single docker host)
 * `-e FORCE_HOSTNAME="<whatever>" ` to force the hostname in the config file to be set to 'whatever'
