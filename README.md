@@ -37,7 +37,7 @@ Use `-e PRE_CREATE_DB="db1;db2;db3" to create database named "db1", "db2", and "
 
 SSL SUPPORT
 -----------
-By default, Influx DB uses port 8086 for HTTP API. If you want to use SSL API, you can set `SSL_SUPPORT` to `true`  as an environment variable. In that case, you can use HTTP API on port 8086 and HTTPS API on port 8084. Please do not publish port 8086 if you want to only allow HTTTS connection.
+By default, Influx DB uses port 8086 for HTTP API. If you want to use SSL API, you can set `SSL_SUPPORT` to `true`  as an environment variable. In that case, you can use HTTP API on port 8086 and HTTPS API on port 8084. Please do not publish port 8086 if you want to only allow HTTPS connection.
 
 If you provide `SSL_CERT`, system will use user provided ssl certificate. Otherwise system will create a self-signed certificated, which usually has an unauthorized cerificated problem, not recommend.
 
