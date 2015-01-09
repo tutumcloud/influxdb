@@ -38,6 +38,13 @@ if [ "${SSL_SUPPORT}" == "**False**" ]; then
     unset SSL_SUPPORT
 fi
 
+# Add UDP support
+if [ -n "${UDP_DB}" ]; then
+    sed -i -r -e "/^\s+\[input_plugins.udp\]/, /^$/ { s/false/true/; s/#//g; s/\"\"/\"${UDP_DB}\"/g; }" ${CONFIG_FILE}
+fi
+if [ -n "${UDP_PORT}" ]; then
+    sed -i -r -e "/^\s+\[input_plugins.udp\]/, /^$/ { s/4444/${UDP_PORT}/; }" ${CONFIG_FILE}
+fi
 
 #SSL SUPPORT (Enable https support on port 8084)
 API_URL="http://localhost:8086"
