@@ -45,6 +45,12 @@ The cert file should be an combination of Private Key and Public Certificate. In
 
 ```docker run -d -p 8083:8083 -p 8084:8084 -e SSL_SUPPORT="True" -e SSL_CERT="`awk 1 ORS='\\n' ~/cert.pem`" tutum/influxdb:latest``` 
 
+UDP SUPPORT
+-----------
+If you provide a `UDP_DB`, influx will open a UDP port (4444 or if provided `UDP_PORT`) for reception of events for the named database.
+
+```docker run -d -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 --expose 4444 -e UDP_DB="my_db" tutum/influxdb```
+
 Clustering
 ----------
 Use :
