@@ -3,15 +3,23 @@ machine:
     - docker
 dependencies:
   override:
-    - docker build -t sut .
+    - docker build -t influxdb:latest .
+    - docker build -t influxdb:0.8.8 0.8.8
 test:
   override:
     # basic test
-    - docker run -d -p 8083:8083 -p 8086:8086 sut; sleep 10
-    - curl --retry 10 --retry-delay 5 -L -I -f http://localhost:8083/
-    - curl --retry 10 --retry-delay 5 -L -I -f http://localhost:8086/ping
+    - docker run -d -p 8000:8083 -p 8001:8086 influxdb:latest;
+    - docker run -d -p 8002:8083 -p 8003:8086 influxdb:0.8.8; sleep 10
+    - curl --retry 10 --retry-delay 5 -L -I -f http://localhost:8000/
+    - curl --retry 10 --retry-delay 5 -L -I -f http://localhost:8001/ping
+    - curl --retry 10 --retry-delay 5 -L -I -f http://localhost:8002/
+    - curl --retry 10 --retry-delay 5 -L -I -f http://localhost:8003/ping
     # test for ssl (self-signed certificate)
-    - docker run -d -p 8183:8083 -p 8184:8084 -p 8186:8086 -e SSL_SUPPORT=true sut; sleep 10
-    - curl --retry 10 --retry-delay 5 -L -I -f http://localhost:8183/
-    - curl --retry 10 --retry-delay 5 -L -I -f http://localhost:8186/ping
-    - curl --retry 10 --retry-delay 5 -L -I -f -k  https://localhost:8184/ping
+    - docker run -d -p 9000:8083 -p 9001:8084 -p 9002:8086 -e SSL_SUPPORT=true influxdb:latest
+    - docker run -d -p 9003:8083 -p 9004:8084 -p 9005:8086 -e SSL_SUPPORT=true influxdb:0.8.8; sleep 10
+    - curl --retry 10 --retry-delay 5 -L -I -f http://localhost:9000/
+    - curl --retry 10 --retry-delay 5 -L -I -f -k  https://localhost:9001/ping
+    - curl --retry 10 --retry-delay 5 -L -I -f http://localhost:9002/ping
+    - curl --retry 10 --retry-delay 5 -L -I -f http://localhost:9003/
+    - curl --retry 10 --retry-delay 5 -L -I -f -k  https://localhost:9004/ping
+    - curl --retry 10 --retry-delay 5 -L -I -f http://localhost:9005/ping
