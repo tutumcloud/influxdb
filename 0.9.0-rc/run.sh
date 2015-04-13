@@ -78,7 +78,7 @@ if [ -n "${PRE_CREATE_DB}" ]; then
         echo "=> Database had been created before, skipping ..."
     else
         echo "=> Starting InfluxDB ..."
-        exec /usr/bin/influxdb -config=${CONFIG_FILE} &
+        exec /opt/influxdb/influxd -config=${CONFIG_FILE} &
         PASS=${INFLUXDB_INIT_PWD:-root}
         arr=$(echo ${PRE_CREATE_DB} | tr ";" "\n")
 
