@@ -34,8 +34,8 @@ read-timeout = "5s"
   [input_plugins.graphite]
   enabled = false
   # port = 2003
-  # database = ""  # store graphite data in this database
-  # udp_enabled = true # enable udp interface on the same port as the tcp interface
+  # database = ""
+  # udp_enabled = true
 
   [input_plugins.udp]
   enabled = false
