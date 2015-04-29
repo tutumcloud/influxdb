@@ -38,6 +38,15 @@ if [ "${SSL_SUPPORT}" == "**False**" ]; then
     unset SSL_SUPPORT
 fi
 
+# Add Graphite support
+if [ -n "${GRAPHITE_DB}" ]; then
+    sed -i -r -e "/^\s+\[input_plugins.graphite\]/, /^$/ { s/false/true/; s/#//g; s/\"\"/\"${GRAPHITE_DB}\"/g; }" ${CONFIG_FILE}
+fi
+
+if [ -n "${GRAPHITE_PORT}" ]; then
+    sed -i -r -e "/^\s+\[input_plugins.graphite\]/, /^$/ { s/2003/${GRAPHITE_PORT}/; }" ${CONFIG_FILE}
+fi
+
 # Add UDP support
 if [ -n "${UDP_DB}" ]; then
     sed -i -r -e "/^\s+\[input_plugins.udp\]/, /^$/ { s/false/true/; s/#//g; s/\"\"/\"${UDP_DB}\"/g; }" ${CONFIG_FILE}
