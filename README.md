@@ -31,7 +31,7 @@ Alternatively, you can use RESTful API to talk to InfluxDB on port `8086`
 
 Initially Create Database
 -------------------------
-Use `-e PRE_CREATE_DB="db1;db2;db3" to create database named "db1", "db2", and "db3" on the first time the container starts automatically. Each database name is separated by `;`. For example:
+Use `-e PRE_CREATE_DB="db1;db2;db3"` to create database named "db1", "db2", and "db3" on the first time the container starts automatically. Each database name is separated by `;`. For example:
 
 ```docker run -d -p 8083:8083 -p 8084:8084 -e PRE_CREATE_DB="db1;db2;db3" tutum/influxdb:latest``` 
 
@@ -54,12 +54,14 @@ If you provide a `UDP_DB`, influx will open a UDP port (4444 or if provided `UDP
 Clustering
 ----------
 Use :
+
 * `-e SEEDS="host1:8090, host2:8090"` to pass seeds nodes to your container.
 * `-e REPLI_FACTOR=x` where x is the replicator factor of shards through the cluster (defaults to 1)
 * `-e FORCE_HOSTNAME="auto"` to force the hostname in the config file to be set to the container IPv4 eth0 address (usefull to test clustering on a single docker host)
 * `-e FORCE_HOSTNAME="<whatever>" ` to force the hostname in the config file to be set to 'whatever'
 
 Example on a single docker host :
+
 * launch first container :
 ```
 docker run -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 \
