@@ -1,5 +1,8 @@
 tutum-docker-influxdb
 =====================
+
+[![Deploy to Tutum](https://s.tutum.co/deploy-to-tutum.svg)](https://dashboard.tutum.co/stack/deploy/)
+
 InfluxDB image
 
 
@@ -11,7 +14,7 @@ To create the image `tutum/influxdb`, execute the following command on tutum-doc
     docker build -t tutum/influxdb .
 
 You can now push new image to the registry:
-    
+
     docker push tutum/influxdb
 
 
@@ -38,7 +41,7 @@ Initially create Database
 -------------------------
 Use `-e PRE_CREATE_DB="db1;db2;db3"` to create database named "db1", "db2", and "db3" on the first time the container starts automatically. Each database name is separated by `;`. For example:
 
-```docker run -d -p 8083:8083 -p 8084:8084 -e PRE_CREATE_DB="db1;db2;db3" tutum/influxdb:latest``` 
+```docker run -d -p 8083:8083 -p 8084:8084 -e PRE_CREATE_DB="db1;db2;db3" tutum/influxdb:latest```
 
 SSL support
 -----------
@@ -48,7 +51,7 @@ If you provide `SSL_CERT`, system will use user provided ssl certificate. Otherw
 
 The cert file should be an combination of Private Key and Public Certificate. In order to pass it as an environment variable, you need specifically convert `newline` to `\n`(two characters). In order to do this, you can simply run the command `awk 1 ORS='\\n' <your_cert.pem>`. For example:
 
-```docker run -d -p 8083:8083 -p 8084:8084 -e SSL_SUPPORT="True" -e SSL_CERT="`awk 1 ORS='\\n' ~/cert.pem`" tutum/influxdb:latest``` 
+```docker run -d -p 8083:8083 -p 8084:8084 -e SSL_SUPPORT="True" -e SSL_CERT="`awk 1 ORS='\\n' ~/cert.pem`" tutum/influxdb:latest```
 
 UDP support
 -----------
