@@ -95,7 +95,7 @@ if [ -n "${PRE_CREATE_DB}" ]; then
         for x in $arr
         do
             echo "=> Creating database: ${x}"
-            /opt/influxdb/influx -host=${API_URL} -username=root -password=${PASS} -execute="create database ${x}"
+            /opt/influxdb/influx -host=localhost -port=8086 -username=root -password="${PASS}" -execute="create database \"${x}\""
         done
         echo ""
 
