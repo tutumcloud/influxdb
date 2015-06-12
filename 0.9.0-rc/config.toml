@@ -2,6 +2,9 @@ bind-address = "0.0.0.0"
 port = 8086
 reporting-disabled = false
 
+[meta]
+  dir = "/var/opt/influxdb/meta"
+
 [initialization]
   join-urls = ""
 
@@ -60,3 +63,7 @@ reporting-disabled = false
   compute-runs-per-interval = 10
   compute-no-more-than = "2m0s"
   disabled = false
+
+[hinted-handoff]
+  enabled = true
+  dir = "/var/opt/influxdb/hh"
