@@ -1,5 +1,8 @@
 tutum-docker-influxdb
 =====================
+
+[![Deploy to Tutum](https://s.tutum.co/deploy-to-tutum.svg)](https://dashboard.tutum.co/stack/deploy/)
+
 InfluxDB image
 
 
@@ -11,16 +14,26 @@ To create the image `tutum/influxdb`, execute the following command on tutum-doc
     docker build -t tutum/influxdb .
 
 You can now push new image to the registry:
-    
-    docker push tutum/influxdb
 
+    docker push tutum/influxdb
+    
+Tags
+----
+
+    tutum/influxdb:latest -> influxdb 0.9
+    tutum/influxdb:0.9    -> influxdb 0.9
+    tutum/influxdb:0.8.8  -> influxdeb 0.8.8
 
 Running your InfluxDB image
 --------------------------
 
 Start your image binding the external ports `8083` and `8086` in all interfaces to your container. Ports `8090` and `8099` are only used for clustering and should not be exposed to the internet.
 
-    docker run -d -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 tutum/influxdb
+    docker run -d -p 8083:8083 -p 8086:8086 tutum/influxdb
+
+There's also a `0.9.0-rc` version available, which is **not** backwards compatible with `0.8.x`:
+
+	docker run -d -p 8083:8083 -p 8086:8086 tutum/influxdb:0.9.0-rc
 
 
 Configuring your InfluxDB
@@ -29,23 +42,24 @@ Open your browse to access `localhost:8083` to configure InfluxDB. Fill the port
 
 Alternatively, you can use RESTful API to talk to InfluxDB on port `8086`
 
-Initially Create Database
+
+Initially create Database
 -------------------------
 Use `-e PRE_CREATE_DB="db1;db2;db3"` to create database named "db1", "db2", and "db3" on the first time the container starts automatically. Each database name is separated by `;`. For example:
 
-```docker run -d -p 8083:8083 -p 8084:8084 -e PRE_CREATE_DB="db1;db2;db3" tutum/influxdb:latest``` 
+```docker run -d -p 8083:8083 -p 8084:8084 -e PRE_CREATE_DB="db1;db2;db3" tutum/influxdb:latest```
 
-SSL SUPPORT
------------
+SSL support (Not supported in 0.9.0)
+------------------------------------
 By default, Influx DB uses port 8086 for HTTP API. If you want to use SSL API, you can set `SSL_SUPPORT` to `true`  as an environment variable. In that case, you can use HTTP API on port 8086 and HTTPS API on port 8084. Please do not publish port 8086 if you want to only allow HTTPS connection.
 
 If you provide `SSL_CERT`, system will use user provided ssl certificate. Otherwise system will create a self-signed certificated, which usually has an unauthorized cerificated problem, not recommend.
 
 The cert file should be an combination of Private Key and Public Certificate. In order to pass it as an environment variable, you need specifically convert `newline` to `\n`(two characters). In order to do this, you can simply run the command `awk 1 ORS='\\n' <your_cert.pem>`. For example:
 
-```docker run -d -p 8083:8083 -p 8084:8084 -e SSL_SUPPORT="True" -e SSL_CERT="`awk 1 ORS='\\n' ~/cert.pem`" tutum/influxdb:latest``` 
+```docker run -d -p 8083:8083 -p 8084:8084 -e SSL_SUPPORT="True" -e SSL_CERT="`awk 1 ORS='\\n' ~/cert.pem`" tutum/influxdb:latest```
 
-UDP SUPPORT
+UDP support
 -----------
 If you provide a `UDP_DB`, influx will open a UDP port (4444 or if provided `UDP_PORT`) for reception of events for the named database.
 
