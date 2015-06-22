@@ -56,6 +56,7 @@ if [ -n "${UDP_PORT}" ]; then
 fi
 
 # Pre create database on the initiation of the container
+API_URL="http://localhost:8086"
 if [ -n "${PRE_CREATE_DB}" ]; then
     echo "=> About to create the following database: ${PRE_CREATE_DB}"
     if [ -f "/data/.pre_db_created" ]; then
