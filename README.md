@@ -22,7 +22,7 @@ Tags
 
     tutum/influxdb:latest -> influxdb 0.9
     tutum/influxdb:0.9    -> influxdb 0.9
-    tutum/influxdb:0.8.8  -> influxdeb 0.8.8
+    tutum/influxdb:0.8.8  -> influxdb 0.8.8
 
 Running your InfluxDB image
 --------------------------
@@ -31,9 +31,9 @@ Start your image binding the external ports `8083` and `8086` in all interfaces 
 
     docker run -d -p 8083:8083 -p 8086:8086 tutum/influxdb
 
-There's also a `0.9.0-rc` version available, which is **not** backwards compatible with `0.8.x`:
+**Note**: `influxdb:0.9` is **NOT** backwards compatible with `0.8.x`. If you need version `0.8.x`, please run:
 
-	docker run -d -p 8083:8083 -p 8086:8086 tutum/influxdb:0.9.0-rc
+	docker run -d -p 8083:8083 -p 8086:8086 tutum/influxdb:0.8.8
 
 
 Configuring your InfluxDB
