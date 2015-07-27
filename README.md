@@ -33,17 +33,17 @@ Start your image binding the external ports `8083` and `8086` in all interfaces 
 
 `Docker` containers are easy to delete. If you delete your container instance and your cluster goes offline, you'll lose the InfluxDB store and configuration. If you are serious about keeping InfluxDB data persistently, then consider adding a volume mapping to the containers `/data` folder:
 
-  docker run -d --volume=/var/influxdb:/data -p 8083:8083 -p 8086:8086 tutum/influxdb
+    docker run -d --volume=/var/influxdb:/data -p 8083:8083 -p 8086:8086 tutum/influxdb
 
 **Note**: `influxdb:0.9` is **NOT** backwards compatible with `0.8.x`. If you need version `0.8.x`, please run:
 
-	docker run -d -p 8083:8083 -p 8086:8086 tutum/influxdb:0.8.8
+    docker run -d -p 8083:8083 -p 8086:8086 tutum/influxdb:0.8.8
 
 Configuring your InfluxDB
 -------------------------
 Open your browse to access `localhost:8083` to configure InfluxDB. Fill the port which maps to `8086`. The default credential is `root:root`. Please change it as soon as possible.
 
-Alternatively, you can use RESTful API to talk to InfluxDB on port `8086`. For example, if you have problems with the initial database creation for version `0.9.x`, you can use the new `influx` cli tool to configure the database. While the container is running, you can enter the container interactively with the `influx` tool:
+Alternatively, you can use RESTful API to talk to InfluxDB on port `8086`. For example, if you have problems with the initial database creation for version `0.9.x`, you can use the new `influx` cli tool to configure the database. While the container is running, you launch the tool with the following command:
 
   ```
   docker exec -ti influxdb-container-name /opt/influxdb/influx
@@ -113,4 +113,3 @@ docker run --link masterinflux:master -p 8083 -p 8086 --expose 8090 --expose 809
   -e SEEDS="master:8090" -e FORCE_HOSTNAME="auto" \
   -d  tutum/influxdb
 ```
-
