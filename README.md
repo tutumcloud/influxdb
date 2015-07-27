@@ -73,7 +73,7 @@ Alternatively, create a database and user with the InfluxDB 0.9 shell:
   user  admin
   root  true
 ```
-For additional Administration methods with the InfluxDB 0.9 shell, check out the ['Administration'](https://influxdb.com/docs/v0.9/administration/administration.html) guide on the InfluxDB website.
+For additional Administration methods with the InfluxDB 0.9 shell, check out the [`Administration`](https://influxdb.com/docs/v0.9/administration/administration.html) guide on the InfluxDB website.
 
 SSL support (Available only in influxdb:0.8.8)
 ---------------------------------------------
