@@ -41,7 +41,7 @@ Start your image binding the external ports `8083` and `8086` in all interfaces 
 
 Configuring your InfluxDB
 -------------------------
-Open your browse to access `localhost:8083` to configure InfluxDB. Fill the port which maps to `8086`. The default credential is `root:root`. Please change it as soon as possible.
+Open your browser to access `localhost:8083` to configure InfluxDB. Fill the port which maps to `8086`. The default credential is `root:root`. Please change it as soon as possible.
 
 Alternatively, you can use RESTful API to talk to InfluxDB on port `8086`. For example, if you have problems with the initial database creation for version `0.9.x`, you can use the new `influx` cli tool to configure the database. While the container is running, you launch the tool with the following command:
 
@@ -58,7 +58,7 @@ Use `-e PRE_CREATE_DB="db1;db2;db3"` to create database named "db1", "db2", and 
 
 ```docker run -d -p 8083:8083 -p 8084:8084 -e PRE_CREATE_DB="db1;db2;db3" tutum/influxdb:latest```
 
-Alternatively, create a database and user with the InfluxDB shell:
+Alternatively, create a database and user with the InfluxDB 0.9 shell:
 
 ```
   > CREATE DATABASE db1
@@ -73,14 +73,15 @@ Alternatively, create a database and user with the InfluxDB shell:
   user  admin
   root  true
 ```
+For additional Administration methods with the InfluxDB 0.9 shell, check out the ['Administration'](https://influxdb.com/docs/v0.9/administration/administration.html) guide on the InfluxDB website.
 
 SSL support (Available only in influxdb:0.8.8)
 ---------------------------------------------
 By default, Influx DB uses port 8086 for HTTP API. If you want to use SSL API, you can set `SSL_SUPPORT` to `true`  as an environment variable. In that case, you can use HTTP API on port 8086 and HTTPS API on port 8084. Please do not publish port 8086 if you want to only allow HTTPS connection.
 
-If you provide `SSL_CERT`, system will use user provided ssl certificate. Otherwise system will create a self-signed certificated, which usually has an unauthorized cerificated problem, not recommend.
+If you provide `SSL_CERT`, system will use user provided SSL certificate. Otherwise the system will create a self-signed certificate, which usually has an unauthorized certificate error, not recommend.
 
-The cert file should be an combination of Private Key and Public Certificate. In order to pass it as an environment variable, you need specifically convert `newline` to `\n`(two characters). In order to do this, you can simply run the command `awk 1 ORS='\\n' <your_cert.pem>`. For example:
+The cert file should be a combination of Private Key and Public Certificate. In order to pass it as an environment variable, you need specifically convert `newline` to `\n`(two characters). In order to do this, you can simply run the command `awk 1 ORS='\\n' <your_cert.pem>`. For example:
 
 ```docker run -d -p 8083:8083 -p 8084:8084 -e SSL_SUPPORT="True" -e SSL_CERT="`awk 1 ORS='\\n' ~/cert.pem`" tutum/influxdb:latest```
 
@@ -96,18 +97,18 @@ Use :
 
 * `-e SEEDS="host1:8090, host2:8090"` to pass seeds nodes to your container.
 * `-e REPLI_FACTOR=x` where x is the replicator factor of shards through the cluster (defaults to 1)
-* `-e FORCE_HOSTNAME="auto"` to force the hostname in the config file to be set to the container IPv4 eth0 address (usefull to test clustering on a single docker host)
+* `-e FORCE_HOSTNAME="auto"` to force the hostname in the config file to be set to the container IPv4 eth0 address (useful to test clustering on a single docker host)
 * `-e FORCE_HOSTNAME="<whatever>" ` to force the hostname in the config file to be set to 'whatever'
 
-Example on a single docker host :
+Example on a single docker host:
 
-* launch first container :
+* Launch first container:
 ```
 docker run -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 \
   -e FORCE_HOSTNAME="auto" -e REPLI_FACTOR=2 \
   -d --name masterinflux tutum/influxdb
 ```
-* then launch one or more "slaves":
+* Then launch one or more "slaves":
 ```
 docker run --link masterinflux:master -p 8083 -p 8086 --expose 8090 --expose 8099 \
   -e SEEDS="master:8090" -e FORCE_HOSTNAME="auto" \
