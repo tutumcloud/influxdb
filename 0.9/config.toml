@@ -3,7 +3,7 @@ port = 8086
 reporting-disabled = false
 
 [meta]
-  dir = "/var/opt/influxdb/meta"
+  dir = "/data/meta"
 
 [initialization]
   join-urls = ""
@@ -49,7 +49,7 @@ reporting-disabled = false
   write-tracing = false
   raft-tracing = false
   level  = "info"
-  file   = "/opt/influxdb/shared/log.txt"
+  file   = "/data/log/influxdb.log"
 
 [monitoring]
   enabled = false
@@ -66,4 +66,4 @@ reporting-disabled = false
 
 [hinted-handoff]
   enabled = true
-  dir = "/var/opt/influxdb/hh"
+  dir = "/data/hh"
