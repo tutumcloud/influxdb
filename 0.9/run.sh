@@ -2,6 +2,9 @@
 
 set -m
 CONFIG_FILE="/config/config.toml"
+INFLUX_HOST="localhost"
+INFLUX_API_PORT="8086"
+API_URL="http://${INFLUX_HOST}:${INFLUX_API_PORT}"
 
 # Dynamically change the value of 'max-open-shards' to what 'ulimit -n' returns
 sed -i "s/^max-open-shards.*/max-open-shards = $(ulimit -n)/" ${CONFIG_FILE}
@@ -49,17 +52,17 @@ fi
 
 if [ -n "${GRAPHITE_BINDING}" ]; then
     echo "GRAPHITE_BINDING: ${GRAPHITE_BINDING}"
-    sed -i -r -e "/^\[\[graphite\]\]//, /^$/ { s/\:2003/${GRAPHITE_BINDING}/; }" ${CONFIG_FILE}
+    sed -i -r -e "/^\[\[graphite\]\]/, /^$/ { s/\:2003/${GRAPHITE_BINDING}/; }" ${CONFIG_FILE}
 fi
 
 if [ -n "${GRAPHITE_PROTOCOL}" ]; then
     echo "GRAPHITE_PROTOCOL: ${GRAPHITE_PROTOCOL}"
-    sed -i -r -e "/^\[\[graphite\]\]//, /^$/ { s/\"tcp\"/${GRAPHITE_PROTOCOL}/; }" ${CONFIG_FILE}
+    sed -i -r -e "/^\[\[graphite\]\]/, /^$/ { s/tcp/${GRAPHITE_PROTOCOL}/; }" ${CONFIG_FILE}
 fi
 
 if [ -n "${GRAPHITE_TEMPLATE}" ]; then
     echo "GRAPHITE_TEMPLATE: ${GRAPHITE_TEMPLATE}"
-    sed -i -r -e "/^\[\[graphite\]\]//, /^$/ { s/\"instance\.profile\.measurement\*\"/${GRAPHITE_TEMPLATE}/; }" ${CONFIG_FILE}
+    sed -i -r -e "/^\[\[graphite\]\]/, /^$/ { s/instance\.profile\.measurement\*/${GRAPHITE_TEMPLATE}/; }" ${CONFIG_FILE}
 fi
 
 # Add UDP support
@@ -77,13 +80,11 @@ echo "=> Starting InfluxDB ..."
 exec /opt/influxdb/influxd -config=${CONFIG_FILE} &
 
 # Pre create database on the initiation of the container
-API_URL="http://localhost:8086"
 if [ -n "${PRE_CREATE_DB}" ]; then
     echo "=> About to create the following database: ${PRE_CREATE_DB}"
     if [ -f "/data/.pre_db_created" ]; then
         echo "=> Database had been created before, skipping ..."
     else
-        PASS=${INFLUXDB_INIT_PWD:-root}
         arr=$(echo ${PRE_CREATE_DB} | tr ";" "\n")
 
         #wait for the startup of influxdb
@@ -95,15 +96,25 @@ if [ -n "${PRE_CREATE_DB}" ]; then
             RET=$?
         done
         echo ""
-        echo "=> Creating 'admin' user"
-        /opt/influxdb/influx -host=localhost -port=8086 -execute="CREATE USER admin WITH PASSWORD '${PASS}' WITH ALL PRIVILEGES"
 
-        for x in $arr
-        do
-            echo "=> Creating database: ${x}"
-            /opt/influxdb/influx -host=localhost -port=8086 -username=admin -password="${PASS}" -execute="create database \"${x}\""
-        done
-        echo ""
+        PASS=${INFLUXDB_INIT_PWD:-root}
+        if [ -n "${ADMIN_USER}" ]; then
+          echo "=> Creating admin user"
+          /opt/influxdb/influx -host=${INFLUX_HOST} -port=${INFLUX_API_PORT} -execute="CREATE USER ${ADMIN_USER} WITH PASSWORD '${PASS}' WITH ALL PRIVILEGES"
+          for x in $arr
+          do
+              echo "=> Creating database: ${x}"
+              /opt/influxdb/influx -host=${INFLUX_HOST} -port=${INFLUX_API_PORT} -username=${ADMIN_USER} -password="${PASS}" -execute="create database ${x}"
+              /opt/influxdb/influx -host=${INFLUX_HOST} -port=${INFLUX_API_PORT} -username=${ADMIN_USER} -password="${PASS}" -execute="grant all PRIVILEGES on ${x} to ${ADMIN_USER}"
+          done
+          echo ""
+        else
+          for x in $arr
+          do
+              echo "=> Creating database: ${x}"
+              /opt/influxdb/influx -host=${INFLUX_HOST} -port=${INFLUX_API_PORT} -execute="create database \"${x}\""
+          done
+        fi
 
         touch "/data/.pre_db_created"
     fi

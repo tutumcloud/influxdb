@@ -93,12 +93,12 @@ reporting-disabled = false
 ### Controls one or many listeners for Graphite data.
 ###
 [[graphite]]
-  enabled = true
+  enabled = false
   bind-address = ":2003"
   protocol = "tcp"
   consistency-level = "one"
   separator = "."
-  database = "gaedge"
+  database = "graphitedb"
   # These next lines control how batching works. You should have this enabled
   # otherwise you could get dropped metrics or poor performance. Batching
   # will buffer points in memory if you have many coming in.
