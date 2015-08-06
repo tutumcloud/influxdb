@@ -16,12 +16,12 @@ To create the image `tutum/influxdb`, execute the following command on tutum-doc
 You can now push new image to the registry:
 
     docker push tutum/influxdb
-    
+
 Tags
 ----
 
-    tutum/influxdb:latest -> influxdb 0.9.1
-    tutum/influxdb:0.9    -> influxdb 0.9.1
+    tutum/influxdb:latest -> influxdb 0.9.2.1
+    tutum/influxdb:0.9    -> influxdb 0.9.2.1
     tutum/influxdb:0.8.8  -> influxdb 0.8.8
 
 Running your InfluxDB image
@@ -41,14 +41,14 @@ Start your image binding the external ports `8083` and `8086` in all interfaces 
 
 Configuring your InfluxDB
 -------------------------
-Open your browser to access `localhost:8083` to configure InfluxDB. Fill the port which maps to `8086`. The default credential is `root:root`. Please change it as soon as possible.
+Open your browser to access `localhost:8083` to configure InfluxDB. Fill the port which maps to `8086`. *There is no default user anymore in version 0.9 but you can set `auth-enabled: true` in the config.toml.*
 
 Alternatively, you can use RESTful API to talk to InfluxDB on port `8086`. For example, if you have problems with the initial database creation for version `0.9.x`, you can use the new `influx` cli tool to configure the database. While the container is running, you launch the tool with the following command:
 
   ```
   docker exec -ti influxdb-container-name /opt/influxdb/influx
-  Connected to http://localhost:8086 version 0.9.1
-  InfluxDB shell 0.9.1
+  Connected to http://localhost:8086 version 0.9.2.1
+  InfluxDB shell 0.9.2.1
   >
   ```
 
@@ -56,7 +56,7 @@ Initially create Database
 -------------------------
 Use `-e PRE_CREATE_DB="db1;db2;db3"` to create database named "db1", "db2", and "db3" on the first time the container starts automatically. Each database name is separated by `;`. For example:
 
-```docker run -d -p 8083:8083 -p 8084:8084 -e PRE_CREATE_DB="db1;db2;db3" tutum/influxdb:latest```
+```docker run -d -p 8083:8083 -p 8086:8086 -e ADMIN_USER="root" -e INFLUXDB_INIT_PWD="somepassword" -e PRE_CREATE_DB="db1;db2;db3" tutum/influxdb:latest```
 
 Alternatively, create a database and user with the InfluxDB 0.9 shell:
 
@@ -69,11 +69,13 @@ Alternatively, create a database and user with the InfluxDB 0.9 shell:
   db1
   > USE db1
   > CREATE USER root WITH PASSWORD 'somepassword' WITH ALL PRIVILEGES
+  > GRANT ALL PRIVILEGES ON db1 TO root
   > SHOW USERS
   user  admin
   root  true
 ```
 For additional Administration methods with the InfluxDB 0.9 shell, check out the [`Administration`](https://influxdb.com/docs/v0.9/administration/administration.html) guide on the InfluxDB website.
+
 
 SSL support (Available only in influxdb:0.8.8)
 ---------------------------------------------
@@ -85,11 +87,27 @@ The cert file should be a combination of Private Key and Public Certificate. In 
 
 ```docker run -d -p 8083:8083 -p 8084:8084 -e SSL_SUPPORT="True" -e SSL_CERT="`awk 1 ORS='\\n' ~/cert.pem`" tutum/influxdb:latest```
 
-UDP support (Available in influxdb:0.8.8)
+
+Graphite API support
+----------------------------------------
+InfluxDB has plugin to support the [Graphite Carbon API](http://graphite.readthedocs.org/en/1.0/feeding-carbon.html). This can be customized via the following variables:
+
+- GRAPHITE_DB: name of the database the graphite plugin shall write the incoming metrics to
+- GRAPHITE_BINDING: by default the graphite plugin listens on ':2003'. You can provide any `ipaddress:port`
+- GRAPHITE_PROTOCOL: 'udp' or 'tcp' (default)
+- GRAPHITE_TEMPLATE: By default the template is set to `instance.profile.measurement*` which will parse a metric and create tags from it
+
+```docker run -d -p 8083:8083 -p 8086:8086 -p 2015:2015 -e ADMIN_USER="root" -e INFLUXDB_INIT_PWD="somepassword" -e PRE_CREATE_DB=my_db -e GRAPHITE_DB="my_db" -e GRAPHITE_BINDING=':2015' -e GRAPHITE_PROTOCOL="udp" -e GRAPHITE_template="tag1.tag2.tag3.measurement*" tutum/influxdb```
+
+More details on the configuration of InfluxDB's graphite plugin can be found at: https://github.com/influxdb/influxdb/blob/master/services/graphite/README.md
+
+
+UDP support
 ----------------------------------------
 If you provide a `UDP_DB`, influx will open a UDP port (4444 or if provided `UDP_PORT`) for reception of events for the named database.
 
 ```docker run -d -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 --expose 4444 -e UDP_DB="my_db" tutum/influxdb```
+
 
 Clustering (Available in influxdb:0.8.8)
 ----------------------------------------
