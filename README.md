@@ -102,6 +102,20 @@ InfluxDB has plugin to support the [Graphite Carbon API](http://graphite.readthe
 More details on the configuration of InfluxDB's graphite plugin can be found at: https://github.com/influxdb/influxdb/blob/master/services/graphite/README.md
 
 
+Collectd support
+----------------------------------------
+InfluxDB has a plugin to support the [collectd network plugin](https://collectd.org/wiki/index.php/Plugin:Network). This can be customized via the following variables:
+
+- COLLECTD_DB: name of the database the collectd plugin shall write the incoming metrics to
+- COLLECTD_BINDING: by default the collectd plugin listens on ':25826'. You can provide any `ipaddress:port`
+- COLLECTD_RETENTION_POLICY: custom retention policy
+- types.db: default types.db from collectd version 5.5.0 is provided. For custom types consider adding a volume mapping for /usr/share/collectd/types.db
+
+```docker run -d -p 8083:8083 -p 8086:8086 -p 25826:25826/udp -e ADMIN_USER="root" -e INFLUXDB_INIT_PWD="somepassword" -e PRE_CREATE_DB=my_db -e COLLECTD_DB="my_db" -e COLLECTD_BINDING=':25826' -e COLLECTD_RETENTION_POLICY="mypolicy" -e GRAPHITE_template="tag1.tag2.tag3.measurement*" tutum/influxdb```
+
+More details on the configuration of InfluxDB's graphite plugin can be found at: https://github.com/influxdb/influxdb/blob/master/services/graphite/README.md
+
+
 UDP support
 ----------------------------------------
 If you provide a `UDP_DB`, influx will open a UDP port (4444 or if provided `UDP_PORT`) for reception of events for the named database.

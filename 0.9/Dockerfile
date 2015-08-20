@@ -8,6 +8,7 @@ RUN curl -s -o /tmp/influxdb_latest_amd64.deb https://s3.amazonaws.com/influxdb/
   rm /tmp/influxdb_latest_amd64.deb && \
   rm -rf /var/lib/apt/lists/*
 
+ADD types.db /usr/share/collectd/types.db
 ADD config.toml /config/config.toml
 ADD run.sh /run.sh
 RUN chmod +x /*.sh
