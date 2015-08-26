@@ -65,6 +65,20 @@ if [ -n "${GRAPHITE_TEMPLATE}" ]; then
     sed -i -r -e "/^\[\[graphite\]\]/, /^$/ { s/instance\.profile\.measurement\*/${GRAPHITE_TEMPLATE}/; }" ${CONFIG_FILE}
 fi
 
+# Add Collectd support
+if [ -n "${COLLECTD_DB}" ]; then
+    echo "COLLECTD_DB: ${COLLECTD_DB}"
+    sed -i -r -e "/^\[collectd\]/, /^$/ { s/false/true/; s/( *)# *(.*)\"collectd\"/\1\2\"${COLLECTD_DB}\"/g;}" ${CONFIG_FILE}
+fi
+if [ -n "${COLLECTD_BINDING}" ]; then
+    echo "COLLECTD_BINDING: ${COLLECTD_BINDING}"
+    sed -i -r -e "/^\[collectd\]/, /^$/ { s/( *)# *(.*)\":25826\"/\1\2\"${COLLECTD_BINDING}\"/g;}" ${CONFIG_FILE}
+fi
+if [ -n "${COLLECTD_RETENTION_POLICY}" ]; then
+    echo "COLLECTD_RETENTION_POLICY: ${COLLECTD_RETENTION_POLICY}"
+    sed -i -r -e "/^\[collectd\]/, /^$/ { s/( *)# *(retention-policy.*)\"\"/\1\2\"${COLLECTD_RETENTION_POLICY}\"/g;}" ${CONFIG_FILE}
+fi
+
 # Add UDP support
 if [ -n "${UDP_DB}" ]; then
     sed -i -r -e "/^\[udp\]/, /^$/ { s/false/true/; s/#//g; s/\"udpdb\"/\"${UDP_DB}\"/g; }" ${CONFIG_FILE}
