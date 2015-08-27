@@ -81,10 +81,10 @@ fi
 
 # Add UDP support
 if [ -n "${UDP_DB}" ]; then
-    sed -i -r -e "/^\[udp\]/, /^$/ { s/false/true/; s/#//g; s/\"udpdb\"/\"${UDP_DB}\"/g; }" ${CONFIG_FILE}
+    sed -i -r -e "/^\[\[udp\]\]/, /^$/ { s/false/true/; s/#//g; s/\"udpdb\"/\"${UDP_DB}\"/g; }" ${CONFIG_FILE}
 fi
 if [ -n "${UDP_PORT}" ]; then
-    sed -i -r -e "/^\[udp\]/, /^$/ { s/4444/${UDP_PORT}/; }" ${CONFIG_FILE}
+    sed -i -r -e "/^\[\[udp\]\]/, /^$/ { s/4444/${UDP_PORT}/; }" ${CONFIG_FILE}
 fi
 
 
