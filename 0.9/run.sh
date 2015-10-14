@@ -14,9 +14,9 @@ if [ -n "${FORCE_HOSTNAME}" ]; then
     if [ "${FORCE_HOSTNAME}" == "auto" ]; then
         #set hostname with IPv4 eth0
         HOSTIPNAME=$(ip a show dev eth0 | grep inet | grep eth0 | sed -e 's/^.*inet.//g' -e 's/\/.*$//g')
-        /usr/bin/perl -p -i -e "s/^# hostname.*$/hostname = \"${HOSTIPNAME}\"/g" ${CONFIG_FILE}
+        /usr/bin/perl -p -i -e "s/hostname = \"localhost\"/hostname = \"${HOSTIPNAME}\"/g" ${CONFIG_FILE}
     else
-        /usr/bin/perl -p -i -e "s/^# hostname.*$/hostname = \"${FORCE_HOSTNAME}\"/g" ${CONFIG_FILE}
+        /usr/bin/perl -p -i -e "s/hostname = \"localhost\"/hostname = \"${FORCE_HOSTNAME}\"/g" ${CONFIG_FILE}
     fi
 fi
 
@@ -91,7 +91,11 @@ fi
 echo "influxdb configuration: "
 cat ${CONFIG_FILE}
 echo "=> Starting InfluxDB ..."
-exec /opt/influxdb/influxd -config=${CONFIG_FILE} &
+if [ -n "${JOIN}" ]; then
+  exec /opt/influxdb/influxd -config=${CONFIG_FILE} -join ${JOIN} &
+else
+  exec /opt/influxdb/influxd -config=${CONFIG_FILE} &
+fi
 
 # Pre create database on the initiation of the container
 if [ -n "${PRE_CREATE_DB}" ]; then
