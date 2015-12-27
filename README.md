@@ -120,7 +120,7 @@ UDP support
 ----------------------------------------
 If you provide a `UDP_DB`, influx will open a UDP port (4444 or if provided `UDP_PORT`) for reception of events for the named database.
 
-```docker run -d -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 --expose 4444 -e UDP_DB="my_db" tutum/influxdb```
+```docker run -d -p 8083:8083 -p 8086:8086 -p 4444:4444/udp --expose 8090 --expose 8099 --expose 4444 -e UDP_DB="my_db" tutum/influxdb```
 
 Clustering (Available in influxdb:0.9.4.2-1)
 ----------------------------------------
