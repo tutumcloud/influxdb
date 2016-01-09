@@ -113,7 +113,7 @@ InfluxDB has a plugin to support the [collectd network plugin](https://collectd.
 
 ```docker run -d -p 8083:8083 -p 8086:8086 -p 25826:25826/udp -e ADMIN_USER="root" -e INFLUXDB_INIT_PWD="somepassword" -e PRE_CREATE_DB=my_db -e COLLECTD_DB="my_db" -e COLLECTD_BINDING=':25826' -e COLLECTD_RETENTION_POLICY="mypolicy" tutum/influxdb```
 
-More details on the configuration of InfluxDB's graphite plugin can be found at: https://github.com/influxdb/influxdb/blob/master/services/graphite/README.md
+More details on the configuration of InfluxDB's collectd plugin can be found at: https://github.com/influxdb/influxdb/blob/master/services/collectd/README.md
 
 
 UDP support
