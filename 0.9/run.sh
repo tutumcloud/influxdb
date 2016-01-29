@@ -90,12 +90,6 @@ fi
 
 echo "influxdb configuration: "
 cat ${CONFIG_FILE}
-echo "=> Starting InfluxDB ..."
-if [ -n "${JOIN}" ]; then
-  exec influxd -config=${CONFIG_FILE} -join ${JOIN} &
-else
-  exec influxd -config=${CONFIG_FILE} &
-fi
 
 # Pre create database on the initiation of the container
 if [ -n "${PRE_CREATE_DB}" ]; then
@@ -103,6 +97,10 @@ if [ -n "${PRE_CREATE_DB}" ]; then
     if [ -f "/data/.pre_db_created" ]; then
         echo "=> Database had been created before, skipping ..."
     else
+        echo "=> Starting InfluxDB in background ..."
+        influxd -config=${CONFIG_FILE} &
+        pid="$!"
+
         arr=$(echo ${PRE_CREATE_DB} | tr ";" "\n")
 
         #wait for the startup of influxdb
@@ -135,9 +133,20 @@ if [ -n "${PRE_CREATE_DB}" ]; then
         fi
 
         touch "/data/.pre_db_created"
+
+        echo "=> Stopping InfluxDB ..."
+        if ! kill -s TERM "$pid" || ! wait "$pid"; then
+            echo >&2 'InfluxDB init process failed.'
+            exit 1
+        fi
     fi
 else
     echo "=> No database need to be pre-created"
 fi
 
-fg
+echo "=> Starting InfluxDB in foreground ..."
+if [ -n "${JOIN}" ]; then
+  exec influxd -config=${CONFIG_FILE} -join ${JOIN}
+else
+  exec influxd -config=${CONFIG_FILE}
+fi
