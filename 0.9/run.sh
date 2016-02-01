@@ -5,6 +5,20 @@ CONFIG_FILE="/config/config.toml"
 INFLUX_HOST="localhost"
 INFLUX_API_PORT="8086"
 API_URL="http://${INFLUX_HOST}:${INFLUX_API_PORT}"
+ADMIN=${ADMIN_USER:-root}
+PASS=${INFLUXDB_INIT_PWD:-root}
+
+wait_for_start_of_influxdb(){
+    #wait for the startup of influxdb
+    RET=1
+    while [[ RET -ne 0 ]]; do
+        echo "=> Waiting for confirmation of InfluxDB service startup ..."
+        sleep 3
+        curl -k ${API_URL}/ping 2> /dev/null
+        RET=$?
+    done
+}
+
 
 # Dynamically change the value of 'max-open-shards' to what 'ulimit -n' returns
 sed -i "s/^max-open-shards.*/max-open-shards = $(ulimit -n)/" ${CONFIG_FILE}
@@ -97,61 +111,44 @@ else
   exec influxd -config=${CONFIG_FILE} &
 fi
 
-# Pre create database on the initiation of the container
-if [ -n "${PRE_CREATE_DB}" ] && [ ! -f "/data/.init_script_executed" ]; then
+if [ -f "/data/.init_script_executed" ]; then
+  echo "=> The initialization script had been executed before, skipping ..."
+else
+  #Create the admin user
+  if [ -n "${ADMIN_USER}" ] || [ -n "${INFLUXDB_INIT_PWD}" ]; then
+    wait_for_start_of_influxdb
+    echo "=> Creating admin user"
+    influx -host=${INFLUX_HOST} -port=${INFLUX_API_PORT} -execute="CREATE USER ${ADMIN} WITH PASSWORD '${PASS}' WITH ALL PRIVILEGES"
+  fi
+  
+  # Pre create database on the initiation of the container
+  if [ -n "${PRE_CREATE_DB}" ]; then
     echo "=> About to create the following database: ${PRE_CREATE_DB}"
     arr=$(echo ${PRE_CREATE_DB} | tr ";" "\n")
 
-    if [ -n "${ADMIN_USER}" ]; then
-      for x in $arr
-      do
-          echo "=> Creating database: ${x}"
-          echo "CREATE DATABASE ${x}" >> /tmp/init_script.influxql
-          echo "GRANT ALL PRIVILEGES ON ${x} TO ${ADMIN_USER}" >> /tmp/init_script.influxql
-      done
-    else
-      for x in $arr
-      do
-          echo "=> Creating database: ${x}"
-          echo "CREATE DATABASE ${x}" >> /tmp/init_script.influxql
-      done
-    fi
-fi
-
-# Execute influxql queries contained inside /init_script.influxql
-if [ -f "/data/.init_script_executed" ]; then
-    echo "=> The initialization script had been executed before, skipping ..."
-elif [ -f "/init_script.influxql" ] || [ -f "/tmp/init_script.influxql" ]; then
-    echo "=> About to execute the initialization script"
-
-    cat /init_script.influxql >> /tmp/init_script.influxql
-
-    #wait for the startup of influxdb
-    RET=1
-    while [[ RET -ne 0 ]]; do
-        echo "=> Waiting for confirmation of InfluxDB service startup ..."
-        sleep 3
-        curl -k ${API_URL}/ping 2> /dev/null
-        RET=$?
+    for x in $arr
+    do
+      echo "=> Creating database: ${x}"
+      echo "CREATE DATABASE ${x}" >> /tmp/init_script.influxql
     done
-    echo ""
-
-    PASS=${INFLUXDB_INIT_PWD:-root}
-    if [ -n "${ADMIN_USER}" ]; then
-      echo "=> Creating admin user"
-      influx -host=${INFLUX_HOST} -port=${INFLUX_API_PORT} -execute="CREATE USER ${ADMIN_USER} WITH PASSWORD '${PASS}' WITH ALL PRIVILEGES"
-      echo "=> Creating database: ${x}"
-      influx -host=${INFLUX_HOST} -port=${INFLUX_API_PORT} -username=${ADMIN_USER} -password="${PASS}" < /tmp/init_script.influxql
-      echo ""
-    else
-      echo "=> Creating database: ${x}"
-      influx -host=${INFLUX_HOST} -port=${INFLUX_API_PORT} < /tmp/init_script.influxql
-    fi
-
-
+  fi
+  
+  # Execute influxql queries contained inside /init_script.influxql
+  if [ -f "/init_script.influxql" ] || [ -f "/tmp/init_script.influxql" ]; then
+    echo "=> About to execute the initialization script"
+  
+    cat /init_script.influxql >> /tmp/init_script.influxql
+  
+    wait_for_start_of_influxdb
+     
+    echo "=> Executing the influxql script..." 
+    influx -host=${INFLUX_HOST} -port=${INFLUX_API_PORT} -username=${ADMIN} -password="${PASS}" -import -path /tmp/init_script.influxql
+  
+    echo "=> Influxql script executed." 
     touch "/data/.init_script_executed"
-else
+  else
     echo "=> No initialization script need to be executed"
+  fi
 fi
 
 fg
