@@ -77,6 +77,24 @@ Alternatively, create a database and user with the InfluxDB 0.9 shell:
 For additional Administration methods with the InfluxDB 0.9 shell, check out the [`Administration`](https://influxdb.com/docs/v0.9/administration/administration.html) guide on the InfluxDB website.
 
 
+Initially execute influxql script (Available in influxdb:0.9)
+------------------------------------------------------------
+Use `-v /tmp/init_script.influxql:init_script.influxql:ro` if you want that script to been executed on the first time the container starts automatically. Each influxql command on separated line. For example:
+
+- Docker run command
+```
+docker run -d -p 8083:8083 -p 8086:8086 -e ADMIN_USER="root" -e INFLUXDB_INIT_PWD="somepassword" -v /tmp/init_script.influxql:init_script.influxql:ro tutum/influxdb:latest
+```
+
+- The influxdb script
+```
+CREATE DATABASE mydb
+CREATE USER writer WITH PASSWORD 'writerpass'
+CREATE USER reader WITH PASSWORD 'readerpass'
+GRANT WRITE ON mydb TO writer
+GRANT READ ON mydb TO reader
+```
+
 SSL support (Available only in influxdb:0.8.8)
 ---------------------------------------------
 By default, Influx DB uses port 8086 for HTTP API. If you want to use SSL API, you can set `SSL_SUPPORT` to `true`  as an environment variable. In that case, you can use HTTP API on port 8086 and HTTPS API on port 8084. Please do not publish port 8086 if you want to only allow HTTPS connection.
