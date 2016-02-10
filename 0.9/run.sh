@@ -102,21 +102,20 @@ if [ -n "${UDP_PORT}" ]; then
 fi
 
 
-echo "influxdb configuration: "
-cat ${CONFIG_FILE}
-echo "=> Starting InfluxDB ..."
-if [ -n "${JOIN}" ]; then
-    exec influxd -config=${CONFIG_FILE} -join ${JOIN} &
-else
-    exec influxd -config=${CONFIG_FILE} &
-fi
-
 if [ -f "/data/.init_script_executed" ]; then
     echo "=> The initialization script had been executed before, skipping ..."
 else
+    echo "=> Starting InfluxDB in background ..."
+    if [ -n "${JOIN}" ]; then
+        exec influxd -config=${CONFIG_FILE} -join ${JOIN} &
+    else
+        exec influxd -config=${CONFIG_FILE} &
+    fi
+
+    wait_for_start_of_influxdb
+
     #Create the admin user
     if [ -n "${ADMIN_USER}" ] || [ -n "${INFLUXDB_INIT_PWD}" ]; then
-        wait_for_start_of_influxdb
         echo "=> Creating admin user"
         influx -host=${INFLUX_HOST} -port=${INFLUX_API_PORT} -execute="CREATE USER ${ADMIN} WITH PASSWORD '${PASS}' WITH ALL PRIVILEGES"
     fi
@@ -139,8 +138,6 @@ else
 
         cat /init_script.influxql >> /tmp/init_script.influxql
 
-        wait_for_start_of_influxdb
-
         echo "=> Executing the influxql script..."
         influx -host=${INFLUX_HOST} -port=${INFLUX_API_PORT} -username=${ADMIN} -password="${PASS}" -import -path /tmp/init_script.influxql
 
@@ -149,6 +146,17 @@ else
     else
         echo "=> No initialization script need to be executed"
     fi
+
+    echo "=> Stopping InfluxDB ..."
+    if ! kill -s TERM %1 || ! wait %1; then
+        echo >&2 'InfluxDB init process failed.'
+        exit 1
+    fi
 fi
 
-fg
+echo "=> Starting InfluxDB in foreground ..."
+if [ -n "${JOIN}" ]; then
+    exec influxd -config=${CONFIG_FILE} -join ${JOIN}
+else
+    exec influxd -config=${CONFIG_FILE}
+fi
