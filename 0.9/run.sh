@@ -102,53 +102,61 @@ if [ -n "${UDP_PORT}" ]; then
 fi
 
 
-echo "influxdb configuration: "
-cat ${CONFIG_FILE}
-echo "=> Starting InfluxDB ..."
-if [ -n "${JOIN}" ]; then
-  exec influxd -config=${CONFIG_FILE} -join ${JOIN} &
-else
-  exec influxd -config=${CONFIG_FILE} &
-fi
-
 if [ -f "/data/.init_script_executed" ]; then
-  echo "=> The initialization script had been executed before, skipping ..."
+    echo "=> The initialization script had been executed before, skipping ..."
 else
-  #Create the admin user
-  if [ -n "${ADMIN_USER}" ] || [ -n "${INFLUXDB_INIT_PWD}" ]; then
-    wait_for_start_of_influxdb
-    echo "=> Creating admin user"
-    influx -host=${INFLUX_HOST} -port=${INFLUX_API_PORT} -execute="CREATE USER ${ADMIN} WITH PASSWORD '${PASS}' WITH ALL PRIVILEGES"
-  fi
-  
-  # Pre create database on the initiation of the container
-  if [ -n "${PRE_CREATE_DB}" ]; then
-    echo "=> About to create the following database: ${PRE_CREATE_DB}"
-    arr=$(echo ${PRE_CREATE_DB} | tr ";" "\n")
+    echo "=> Starting InfluxDB in background ..."
+    if [ -n "${JOIN}" ]; then
+        exec influxd -config=${CONFIG_FILE} -join ${JOIN} &
+    else
+        exec influxd -config=${CONFIG_FILE} &
+    fi
 
-    for x in $arr
-    do
-      echo "=> Creating database: ${x}"
-      echo "CREATE DATABASE ${x}" >> /tmp/init_script.influxql
-    done
-  fi
-  
-  # Execute influxql queries contained inside /init_script.influxql
-  if [ -f "/init_script.influxql" ] || [ -f "/tmp/init_script.influxql" ]; then
-    echo "=> About to execute the initialization script"
-  
-    cat /init_script.influxql >> /tmp/init_script.influxql
-  
     wait_for_start_of_influxdb
-     
-    echo "=> Executing the influxql script..." 
-    influx -host=${INFLUX_HOST} -port=${INFLUX_API_PORT} -username=${ADMIN} -password="${PASS}" -import -path /tmp/init_script.influxql
-  
-    echo "=> Influxql script executed." 
-    touch "/data/.init_script_executed"
-  else
-    echo "=> No initialization script need to be executed"
-  fi
+
+    #Create the admin user
+    if [ -n "${ADMIN_USER}" ] || [ -n "${INFLUXDB_INIT_PWD}" ]; then
+        echo "=> Creating admin user"
+        influx -host=${INFLUX_HOST} -port=${INFLUX_API_PORT} -execute="CREATE USER ${ADMIN} WITH PASSWORD '${PASS}' WITH ALL PRIVILEGES"
+    fi
+
+    # Pre create database on the initiation of the container
+    if [ -n "${PRE_CREATE_DB}" ]; then
+        echo "=> About to create the following database: ${PRE_CREATE_DB}"
+        arr=$(echo ${PRE_CREATE_DB} | tr ";" "\n")
+
+        for x in $arr
+        do
+            echo "=> Creating database: ${x}"
+            echo "CREATE DATABASE ${x}" >> /tmp/init_script.influxql
+        done
+    fi
+
+    # Execute influxql queries contained inside /init_script.influxql
+    if [ -f "/init_script.influxql" ] || [ -f "/tmp/init_script.influxql" ]; then
+        echo "=> About to execute the initialization script"
+
+        cat /init_script.influxql >> /tmp/init_script.influxql
+
+        echo "=> Executing the influxql script..."
+        influx -host=${INFLUX_HOST} -port=${INFLUX_API_PORT} -username=${ADMIN} -password="${PASS}" -import -path /tmp/init_script.influxql
+
+        echo "=> Influxql script executed."
+        touch "/data/.init_script_executed"
+    else
+        echo "=> No initialization script need to be executed"
+    fi
+
+    echo "=> Stopping InfluxDB ..."
+    if ! kill -s TERM %1 || ! wait %1; then
+        echo >&2 'InfluxDB init process failed.'
+        exit 1
+    fi
 fi
 
-fg
+echo "=> Starting InfluxDB in foreground ..."
+if [ -n "${JOIN}" ]; then
+    exec influxd -config=${CONFIG_FILE} -join ${JOIN}
+else
+    exec influxd -config=${CONFIG_FILE}
+fi
