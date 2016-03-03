@@ -46,9 +46,10 @@ Open your browser to access `localhost:8083` to configure InfluxDB. Fill the por
 Alternatively, you can use RESTful API to talk to InfluxDB on port `8086`. For example, if you have problems with the initial database creation for version `0.9.x`, you can use the new `influx` cli tool to configure the database. While the container is running, you launch the tool with the following command:
 
   ```
-  docker exec -ti influxdb-container-name /opt/influxdb/influx
-  Connected to http://localhost:8086 version 0.9.2.1
-  InfluxDB shell 0.9.2.1
+  docker exec -ti influxdb-container-name /usr/bin/influx
+  Visit https://enterprise.influxdata.com to register for updates, InfluxDB server management, and monitoring.
+  Connected to http://localhost:8086 version 0.9.6.1
+  InfluxDB shell 0.9.6.1
   >
   ```
 
