@@ -2,7 +2,7 @@ FROM tutum/curl:trusty
 MAINTAINER François-Guillaume Ribreau <docker@fgribreau.com>
 
 # Install InfluxDB
-ENV INFLUXDB_VERSION 0.10.0-1
+ENV INFLUXDB_VERSION 0.10.3-1
 RUN curl -s -o /tmp/influxdb_latest_amd64.deb https://s3.amazonaws.com/influxdb/influxdb_${INFLUXDB_VERSION}_amd64.deb && \
   dpkg -i /tmp/influxdb_latest_amd64.deb && \
   rm /tmp/influxdb_latest_amd64.deb && \
